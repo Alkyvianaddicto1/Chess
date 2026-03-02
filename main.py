@@ -39,12 +39,19 @@ class GameState:
         self.score = 0 
         self.piece_values = {"p": 1, "N": 3, "B": 3, "R": 5, "Q": 9, "K": 0}
         self.is_forfeited = False
+        self.whiteCaptured = [] # Pieces white lost
+        self.blackCaptured = [] # Pieces black lost
 
     def makeMove(self, move):
         # Update Score on capture
         if move.pieceCaptured != "--":
-            val = self.piece_values[move.pieceCaptured[1]]
-            self.score += val if self.whiteToMove else -val
+            if move.pieceCaptured[0] == 'w':
+                self.whiteCaptured.append(move.pieceCaptured)
+            else:
+                self.blackCaptured.append(move.pieceCaptured)
+                
+        val = self.piece_values[move.pieceCaptured[1]]
+        self.score += val if self.whiteToMove else -val
 
         self.board[move.startRow][move.startCol] = "--"
         self.board[move.endRow][move.endCol] = move.pieceMoved

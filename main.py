@@ -10,13 +10,37 @@ MAX_FPS = 15
 IMAGES = {}
 
 def loadImages():
-    # Fixed '♟' to 'bp' to match the board array and image naming convention
-    pieces = ['wp', 'wR', 'wN', 'wB', 'wK', 'wQ', 'bp', 'bR', 'bN', 'bB', 'bK', 'bQ']
-    for piece in pieces:
-        try:
-            IMAGES[piece] = pygame.transform.scale(pygame.image.load("images/" + piece + ".png"), (SQ_SIZE, SQ_SIZE))
-        except:
-            IMAGES[piece] = None
+    # 1. Load the sprite sheet from your main directory
+    try:
+        sheet = pygame.image.load("./images/chess-sprite.png").convert_alpha()
+    except:
+        # Fallback if the file is missing
+        print("Error: 'chess-sprite.jpg' not found.")
+        return
+
+    # 2. Get dimensions of the sheet
+    sheet_width, sheet_height = sheet.get_size()
+    
+    # 3. Calculate piece size (6 columns, 2 rows)
+    piece_w = sheet_width // 6
+    piece_h = sheet_height // 2
+
+    # 4. Map names to the horizontal order in chess-sprite.jpg
+    # The order in your image is: Rook, Bishop, Queen, King, Knight, Pawn
+    piece_order = ['R', 'B', 'Q', 'K', 'N', 'p']
+    
+    for row in range(2):
+        # In this sheet: Top row (0) is Black, Bottom row (1) is White
+        color = 'b' if row == 0 else 'w'
+        for col in range(6):
+            piece_name = color + piece_order[col]
+            
+            # Define the crop area
+            rect = pygame.Rect(col * piece_w, row * piece_h, piece_w, piece_h)
+            
+            # Extract the piece and scale it to your board's square size
+            piece_surface = sheet.subsurface(rect)
+            IMAGES[piece_name] = pygame.transform.smoothscale(piece_surface, (SQ_SIZE, SQ_SIZE))
 
 class GameState:
     def __init__(self):

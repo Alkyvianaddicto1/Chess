@@ -305,6 +305,35 @@ def evaluateBoard(gs):
                 score -= piece_score[square[1]]
     return score
 
+def animateMove(move, screen, board, clock):
+    global current_theme
+    colors = BOARD_THEMES[current_theme]
+    dR = move.endRow - move.startRow
+    dC = move.endCol - move.startCol
+    framesPerSquare = 10 # Increase for slower animation
+    frameCount = (abs(dR) + abs(dC)) * framesPerSquare
+    
+    for frame in range(frameCount + 1):
+        # Calculate percentage of move completion (0.0 to 1.0)
+        t = frame / frameCount
+        row = move.startRow + dR * t
+        col = move.startCol + dC * t
+        
+        # Redraw board and static pieces
+        drawBoard(screen)
+        drawPieces(screen, board)
+        
+        # Erase the piece from its destination square (if it was a capture)
+        # to prevent "ghosting" while the moving piece is sliding over it
+        color = colors[(move.endRow + move.endCol) % 2]
+        endSquareRect = pygame.Rect(move.endCol * SQ_SIZE, move.endRow * SQ_SIZE, SQ_SIZE, SQ_SIZE)
+        pygame.draw.rect(screen, color, endSquareRect)
+        
+        # Draw the moving piece
+        screen.blit(IMAGES[move.pieceMoved], pygame.Rect(col * SQ_SIZE, row * SQ_SIZE, SQ_SIZE, SQ_SIZE))
+        pygame.display.flip()
+        clock.tick(60) # High FPS for smooth sliding
+        
 # --- UI and Main Logic ---
 
 def main(mode="PVP"):

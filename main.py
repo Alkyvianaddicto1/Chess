@@ -403,32 +403,53 @@ def drawPieces(screen, board):
 
 def drawSidePanel(screen, gs):
     global scroll_offset
-    font = pygame.font.SysFont("Arial", 22, True)
+    font = pygame.font.SysFont("Arial", 18, True)
     panel_surface = pygame.Surface((PANEL_WIDTH, HEIGHT))
     panel_surface.set_alpha(160) 
-    panel_surface.fill((50, 50, 50)) 
+    panel_surface.fill((45, 45, 45)) 
     screen.blit(panel_surface, (BOARD_WIDTH, 0))
     pygame.draw.line(screen, (200, 200, 200), (BOARD_WIDTH, 0), (BOARD_WIDTH, HEIGHT), 2)
     
     score_text = f"Score: {gs.score}"
-    screen.blit(font.render(score_text, True, (0,255,0) if gs.score >= 0 else (255,0,0)), (BOARD_WIDTH + 20, 30))
+    score_color = (0, 255, 0) if gs.score >= 0 else (255, 0, 0)
+    screen.blit(font.render(f"Score: {gs.score}", True, score_color), (BOARD_WIDTH + 15, 20))
     turn_text = "White's Turn" if gs.whiteToMove else "Black's Turn"
-    screen.blit(font.render(turn_text, True, (255,255,255)), (BOARD_WIDTH + 20, 70))
+    screen.blit(font.render(turn_text, True, (255, 255, 255)), (BOARD_WIDTH + 15, 45))
+
+    log_rect = pygame.Rect(BOARD_WIDTH + 10, 105, PANEL_WIDTH - 20, 150)
+    pygame.draw.rect(screen, (30, 30, 30), log_rect) # Log background
+
+    # Render Moves in pairs (White, Black)
+    for i in range(0, len(gs.notationLog), 2):
+        move_num = i // 2 + 1
+        # Create text like "1. e4 e5"
+        move_text = f"{move_num}. {gs.notationLog[i]}"
+        if i + 1 < len(gs.notationLog):
+            move_text += f"  {gs.notationLog[i+1]}"
+        
+        # Calculate Y position based on scroll offset
+        y_pos = log_rect.y + 5 + (move_num - 1) * LINE_HEIGHT - scroll_offset
+        
+        # Only render if the move is within the visible log box
+        if log_rect.top <= y_pos <= log_rect.bottom - LINE_HEIGHT:
+            screen.blit(font.render(move_text, True, (255, 255, 255)), (log_rect.x + 5, y_pos))
 
     small_sq = 25 
-    for i, piece in enumerate(gs.blackCaptured):
-        if IMAGES.get(piece):
-            img = pygame.transform.smoothscale(IMAGES[piece], (small_sq, small_sq))
-            screen.blit(img, (BOARD_WIDTH + 20 + (i % 6) * 30, 160 + (i // 6) * 30))
-    for i, piece in enumerate(gs.whiteCaptured):
-        if IMAGES.get(piece):
-            img = pygame.transform.smoothscale(IMAGES[piece], (small_sq, small_sq))
-            screen.blit(img, (BOARD_WIDTH + 20 + (i % 6) * 30, 280 + (i // 6) * 30))
 
-    btn_rect = pygame.Rect(BOARD_WIDTH + 25, 430, 150, 45)
+    screen.blit(font.render("Captured:", True, (200, 200, 200)), (BOARD_WIDTH + 15, 265))
+
+    for i, piece in enumerate(gs.blackCaptured):
+        img = pygame.transform.smoothscale(IMAGES[piece], (small_sq, small_sq))
+        screen.blit(img, (BOARD_WIDTH + 15 + (i % 6) * 30, 290 + (i // 6) * 30))
+    for i, piece in enumerate(gs.whiteCaptured):
+        img = pygame.transform.smoothscale(IMAGES[piece], (small_sq, small_sq))
+        screen.blit(img, (BOARD_WIDTH + 15 + (i % 6) * 30, 350 + (i // 6) * 30))
+
+    btn_rect = pygame.Rect(BOARD_WIDTH + 25, 440, 150, 45)
     mouse = pygame.mouse.get_pos()
     pygame.draw.rect(screen, (200,0,0) if btn_rect.collidepoint(mouse) else (150,0,0), btn_rect, border_radius=8)
-    screen.blit(font.render("FORFEIT", True, (255,255,255)), (btn_rect.x + 35, btn_rect.y + 10))
+    screen.blit(font.render("FORFEIT", True, (255,255,255)), (btn_rect.x + 35, btn_rect.y + 12))
+    
     return btn_rect
 
 def drawEndGameText(screen, text):

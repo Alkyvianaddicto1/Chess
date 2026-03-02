@@ -8,7 +8,7 @@ MAX_FPS = 15
 IMAGES = {}
 
 def loadImages():
-    pieces = ['wp', 'wR', 'wN', 'wB', 'wK', 'wQ', 'bp', 'bR', 'bN', 'bB', 'bK', 'bQ']
+    pieces = ['wp', 'wR', 'wN', 'wB', 'wK', 'wQ', '♟', 'bR', 'bN', 'bB', 'bK', 'bQ']
     for piece in pieces:
         try:
             IMAGES[piece] = pygame.transform.scale(pygame.image.load("images/" + piece + ".png"), (SQ_SIZE, SQ_SIZE))

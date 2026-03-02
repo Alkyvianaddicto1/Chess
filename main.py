@@ -306,34 +306,29 @@ def evaluateBoard(gs):
     return score
 
 def animateMove(move, screen, board, clock):
-    global current_theme
     colors = BOARD_THEMES[current_theme]
     dR = move.endRow - move.startRow
     dC = move.endCol - move.startCol
-    framesPerSquare = 10 # Increase for slower animation
+    framesPerSquare = 5 # Speed: lower is faster
     frameCount = (abs(dR) + abs(dC)) * framesPerSquare
     
     for frame in range(frameCount + 1):
-        # Calculate percentage of move completion (0.0 to 1.0)
         t = frame / frameCount
         row = move.startRow + dR * t
         col = move.startCol + dC * t
         
-        # Redraw board and static pieces
+        # Redraw the static environment
         drawBoard(screen)
         drawPieces(screen, board)
         
-        # Erase the piece from its destination square (if it was a capture)
-        # to prevent "ghosting" while the moving piece is sliding over it
+        # Wipe the destination square to avoid "double piece" glitch
         color = colors[(move.endRow + move.endCol) % 2]
-        endSquareRect = pygame.Rect(move.endCol * SQ_SIZE, move.endRow * SQ_SIZE, SQ_SIZE, SQ_SIZE)
-        pygame.draw.rect(screen, color, endSquareRect)
+        pygame.draw.rect(screen, color, pygame.Rect(move.endCol*SQ_SIZE, move.endRow*SQ_SIZE, SQ_SIZE, SQ_SIZE))
         
-        # Draw the moving piece
-        screen.blit(IMAGES[move.pieceMoved], pygame.Rect(col * SQ_SIZE, row * SQ_SIZE, SQ_SIZE, SQ_SIZE))
+        # Draw the sliding piece
+        screen.blit(IMAGES[move.pieceMoved], pygame.Rect(col*SQ_SIZE, row*SQ_SIZE, SQ_SIZE, SQ_SIZE))
         pygame.display.flip()
-        clock.tick(60) # High FPS for smooth sliding
-
+        clock.tick(60) # Keep animation smooth
 # --- UI and Main Logic ---
 
 def main(mode="PVP"):
@@ -347,6 +342,8 @@ def main(mode="PVP"):
     running, sqSelected, playerClicks = True, (), []
     validMoves = gs.getValidMoves()
     moveMade = False
+    gameOver = False
+    animate = False # 1. Initialize the local variable here
     gameOver = False
     
     # Mode Setup: playerOne is White (Human), playerTwo is Black (Human or AI)
@@ -439,7 +436,7 @@ def main(mode="PVP"):
             validMoves = gs.getValidMoves()
             moveMade = False
             animate = False
-            
+
             total_height = (len(gs.notationLog) // 2) * LINE_HEIGHT
             if total_height > 150: # 150 is the height of the log_rect
                 scroll_offset = total_height - 130

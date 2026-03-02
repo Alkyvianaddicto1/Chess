@@ -43,21 +43,27 @@ class GameState:
         self.blackCaptured = [] # Pieces black lost
 
     def makeMove(self, move):
-        # Update Score on capture
+        # Update Score and Captured Lists only if a piece is actually captured
         if move.pieceCaptured != "--":
+            # Track the captured piece for the UI gallery
             if move.pieceCaptured[0] == 'w':
                 self.whiteCaptured.append(move.pieceCaptured)
             else:
                 self.blackCaptured.append(move.pieceCaptured)
                 
-        val = self.piece_values[move.pieceCaptured[1]]
-        self.score += val if self.whiteToMove else -val
+            # Calculate and update the numerical score
+            val = self.piece_values[move.pieceCaptured[1]]
+            self.score += val if self.whiteToMove else -val
 
+        # Execute the physical move on the board
         self.board[move.startRow][move.startCol] = "--"
         self.board[move.endRow][move.endCol] = move.pieceMoved
         self.moveLog.append(move)
+        
+        # Swap turns
         self.whiteToMove = not self.whiteToMove
         
+        # Update king's location if the King was the piece moved
         if move.pieceMoved == "wK":
             self.whiteKingLocation = (move.endRow, move.endCol)
         elif move.pieceMoved == "bK":
@@ -72,7 +78,7 @@ class GameState:
                     self.whiteCaptured.pop()
                 else:
                     self.blackCaptured.pop()
-                    
+
                 val = self.piece_values[move.pieceCaptured[1]]
                 self.score -= val if self.whiteToMove else -val
 

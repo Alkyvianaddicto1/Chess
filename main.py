@@ -184,6 +184,7 @@ def main():
         for e in pygame.event.get():
             if e.type == pygame.QUIT:
                 running = False
+            # Mouse handler
             elif e.type == pygame.MOUSEBUTTONDOWN:
                 location = pygame.mouse.get_pos()
                 col, row = location[0] // SQ_SIZE, location[1] // SQ_SIZE
@@ -203,11 +204,24 @@ def main():
                     if not moveMade:
                         playerClicks = [sqSelected]
 
+            # Shortcut keys handler
+            elif e.type == pygame.KEYDOWN:
+                if e.key == pygame.K_z: # Undo move when 'z' is pressed
+                    gs.undoMove()
+                    moveMade = True
+                if e.key == pygame.K_r: # Reset game when 'r' is pressed
+                    gs = GameState()
+                    validMoves = gs.getValidMoves()
+                    sqSelected = ()
+                    playerClicks = []
+                    moveMade = False
+
         if moveMade:
             validMoves = gs.getValidMoves()
             moveMade = False
 
-        drawGameState(screen, gs)
+        # Draw updated state
+        drawGameState(screen, gs, validMoves, sqSelected) # Added validMoves and sqSelected
         clock.tick(MAX_FPS)
         pygame.display.flip()
 

@@ -194,6 +194,38 @@ class GameState:
             if 0 <= er < 8 and 0 <= ec < 8 and self.board[er][ec][0] != ally:
                 moves.append(Move((r, c), (er, ec), self.board))
 
+    def findGreedyMove(gs, validMoves):
+        """Medium Difficulty: Picks the move with the highest value capture."""
+        turnMultiplier = 1 if gs.whiteToMove else -1
+        maxScore = -float('inf')
+        bestMove = None
+        
+        for move in validMoves:
+            gs.makeMove(move)
+            if gs.checkMate:
+                score = 999
+            elif gs.staleMate:
+                score = 0
+            else:
+                score = turnMultiplier * gs.score
+            
+            if score > maxScore:
+                maxScore = score
+                bestMove = move
+            gs.undoMove()
+        return bestMove if bestMove else random.choice(validMoves)
+
+
+    def findBestMove(gs, validMoves, depth):
+        """Hard/God Mode: Uses Minimax with Alpha-Beta Pruning."""
+        global nextMove
+        nextMove = None
+        random.shuffle(validMoves)
+        minimax(gs, depth, -10000, 10000, gs.whiteToMove)
+        return nextMove if nextMove else random.choice(validMoves)
+
+    
+    
 # --- UI and Main Logic ---
 
 def main(mode="PVP"):

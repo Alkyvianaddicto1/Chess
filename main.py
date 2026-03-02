@@ -217,15 +217,22 @@ def main(mode="PVP"):
 
         for e in pygame.event.get():
             if e.type == pygame.QUIT:
+                pygame.quit()
+                sys.exit()
                 running = False
+
             elif e.type == pygame.MOUSEBUTTONDOWN and not gameOver:
                 location = pygame.mouse.get_pos()
+
                 if forfeit_btn.collidepoint(location):
                     gs.is_forfeited = True
                     gameOver = True
+
+                if gameOver:
+                    return
                 
                 # HUMAN CLICK LOGIC
-                if humanTurn and location[0] <= BOARD_WIDTH:
+                if not gameOver and humanTurn and location[0] <= BOARD_WIDTH:
                     col, row = location[0] // SQ_SIZE, location[1] // SQ_SIZE
                     if sqSelected == (row, col):
                         sqSelected, playerClicks = (), []
@@ -257,6 +264,7 @@ def main(mode="PVP"):
         # COMPUTER MOVE LOGIC (AI)
         if not gameOver and not humanTurn:
             if validMoves:
+                pygame.time.delay(500) # Slight delay so moves aren't instant
                 ai_move = random.choice(validMoves)
                 gs.makeMove(ai_move)
                 moveMade = True

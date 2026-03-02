@@ -31,17 +31,14 @@ def loadImages():
     piece_order = ['R', 'B', 'Q', 'K', 'N', 'p']
     
     for row in range(2):
-        # In this sheet: Top row (0) is Black, Bottom row (1) is White
+        # Row 0 is Black, Row 1 is White in the sprite sheet
         color = 'b' if row == 0 else 'w'
         for col in range(6):
             piece_name = color + piece_order[col]
-            
-            # Define the crop area
             rect = pygame.Rect(col * piece_w, row * piece_h, piece_w, piece_h)
-            
-            # Extract the piece and scale it to your board's square size
-            piece_surface = sheet.subsurface(rect)
+            # Crop and scale to fit board dimensions
             IMAGES[piece_name] = pygame.transform.smoothscale(sheet.subsurface(rect), (SQ_SIZE, SQ_SIZE))
+
 
 class GameState:
     def __init__(self):

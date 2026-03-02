@@ -117,7 +117,26 @@ class GameState:
                 if c+1 <= 7:
                     if self.board[r+1][c+1][0] == 'b':
                         moves.append(Move((r, c), (r+1, c+1), self.board))
-
+    
+    def getRookMoves(self, r, c, moves):
+        directions = ((-1, 0), (0, -1), (1, 0), (0, 1)) # up, left, down, right
+        enemyColor = "b" if self.whiteToMove else "w"
+        for d in directions:
+            for i in range(1, 8):
+                endRow = r + d[0] * i
+                endCol = c + d[1] * i
+                if 0 <= endRow < 8 and 0 <= endCol < 8:
+                    endPiece = self.board[endRow][endCol]
+                    if endPiece == "--": # Empty space
+                        moves.append(Move((r, c), (endRow, endCol), self.board))
+                    elif endPiece[0] == enemyColor: # Enemy piece
+                        moves.append(Move((r, c), (endRow, endCol), self.board))
+                        break
+                    else: # Friendly piece
+                        break
+                else: # Off board
+                    break
+                
 class Move:
     def __init__(self, startSq, endSq, board):
         self.startRow = startSq[0]

@@ -13,6 +13,7 @@ def loadImages():
     # 1. Load the sprite sheet from your main directory
     try:
         sheet = pygame.image.load("./images/chess-sprite.png").convert_alpha()
+        sheet.set_colorkey((0, 0, 0))
     except:
         # Fallback if the file is missing
         print("Error: 'chess-sprite.jpg' not found.")
@@ -40,7 +41,7 @@ def loadImages():
             
             # Extract the piece and scale it to your board's square size
             piece_surface = sheet.subsurface(rect)
-            IMAGES[piece_name] = pygame.transform.smoothscale(piece_surface, (SQ_SIZE, SQ_SIZE))
+            IMAGES[piece_name] = pygame.transform.smoothscale(sheet.subsurface(rect), (SQ_SIZE, SQ_SIZE))
 
 class GameState:
     def __init__(self):

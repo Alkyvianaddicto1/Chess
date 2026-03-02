@@ -68,6 +68,11 @@ class GameState:
             move = self.moveLog.pop()
             # Reverse score on undo
             if move.pieceCaptured != "--":
+                if move.pieceCaptured[0] == 'w':
+                    self.whiteCaptured.pop()
+                else:
+                    self.blackCaptured.pop()
+                    
                 val = self.piece_values[move.pieceCaptured[1]]
                 self.score -= val if self.whiteToMove else -val
 

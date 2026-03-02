@@ -1,6 +1,7 @@
 import pygame
 import sys
 from main import main as start_chess_game
+from mode import mode_menu  # Import the new mode selection screen
 
 # --- Configuration ---
 WIDTH, HEIGHT = 512, 512
@@ -38,8 +39,16 @@ def main_menu():
             
             if event.type == pygame.MOUSEBUTTONDOWN:
                 if play_btn.collidepoint(mouse_pos):
-                    # This runs the game. When the game ends, it returns here.
-                    start_chess_game() 
+                    # 1. Open Mode Selection
+                    choice = mode_menu() 
+                    
+                    # 2. Launch Game based on choice
+                    if choice != "BACK":
+                        # Resets the display for the game dimensions (712x512)
+                        start_chess_game(mode=choice)
+                        # Re-reset display for menu after game exits
+                        screen = pygame.display.set_mode((WIDTH, HEIGHT))
+                        
                 if quit_btn.collidepoint(mouse_pos):
                     pygame.quit()
                     sys.exit()

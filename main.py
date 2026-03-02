@@ -260,7 +260,7 @@ class Move:
             return self.moveID == other.moveID
         return False
 
-def main():
+def main(mode="PVP"):
     pygame.init()
     screen = pygame.display.set_mode((WIDTH, HEIGHT))
     pygame.display.set_caption("Python Chess")
@@ -271,20 +271,28 @@ def main():
     validMoves = gs.getValidMoves()
     moveMade = False
     gameOver = False
+    playerOne = True # If a human is playing white, this is True.
+    playerTwo = True if mode == "PVP" else False # If mode is PVC, playerTwo (Black) is False (AI).
 
     while running:
         forfeit_btn = drawSidePanel(screen, gs)
+        humanTurn = (gs.whiteToMove and playerOne) or (not gs.whiteToMove and playerTwo)
 
         for e in pygame.event.get():
             if e.type == pygame.QUIT:
                 running = False
-            elif e.type == pygame.MOUSEBUTTONDOWN:
-                if not gameOver: # Only allow moves if game is not over
+            elif e.type == pygame.MOUSEBUTTONDOWN and humanTurn:
+                if not gameOver and not humanTurn: # Only allow moves if game is not over
                     location = pygame.mouse.get_pos()
                     
                     if forfeit_btn.collidepoint(location):
                         gameOver = True
                         gs.is_forfeited = Truemenu
+
+                    import random
+                    if validMoves:
+                        gs.makeMove(random.choice(validMoves))
+                        moveMade = True
 
                 # Ensure click is on the board
                 if location[0] <= BOARD_WIDTH:

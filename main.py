@@ -286,6 +286,7 @@ def minimax(gs, depth, depth_limit, alpha, beta, isMaximizing):
 # --- UI and Main Logic ---
 
 def main(mode="PVP"):
+    global current_theme, scroll_offset
     pygame.init()
     screen = pygame.display.set_mode((WIDTH, HEIGHT))
     pygame.display.set_caption("Python Chess")
@@ -342,12 +343,11 @@ def main(mode="PVP"):
 
             elif e.type == pygame.KEYDOWN:
 
-                if e.key == pygame.K_c: # Press 'C' to change colors
-                    global current_theme  # Add this line to access the global variable
+                if e.key == pygame.K_c: # Press 'C' to cycle themes
                     theme_names = list(BOARD_THEMES.keys())
                     current_index = theme_names.index(current_theme)
-                    # Cycle to the next theme in the list
                     current_theme = theme_names[(current_index + 1) % len(theme_names)]
+                    print(f"Switched theme to: {current_theme}")
 
                 if e.key == pygame.K_z:
                     gs.undoMove()

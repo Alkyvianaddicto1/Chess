@@ -11,13 +11,6 @@ SQ_SIZE = HEIGHT // DIMENSION
 MAX_FPS = 15
 IMAGES = {}
 scroll_offset = 0
-LINE_HEIGHT = 22
-BOARD_THEMES = {
-    "Classic": (pygame.Color("white"), pygame.Color("gray")),
-    "Green": (pygame.Color("#eeeed2"), pygame.Color("#769656")),
-    "Blue": (pygame.Color("#ebecd0"), pygame.Color("#779bb0")),
-    "Dark": (pygame.Color("#777777"), pygame.Color("#333333"))
-}
 current_theme = "Classic" # Default theme
 
 def loadImages():

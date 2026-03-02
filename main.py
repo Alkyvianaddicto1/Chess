@@ -77,6 +77,19 @@ class GameState:
                 return True
         return False
 
+    def getAllPossibleMoves(self):
+        moves = []
+        for r in range(DIMENSION):
+            for c in range(DIMENSION):
+                turn = self.board[r][c][0]
+                if (turn == 'w' and self.whiteToMove) or (turn == 'b' and not self.whiteToMove):
+                    piece = self.board[r][c][1]
+                    if piece == 'p':
+                        self.getPawnMoves(r, c, moves)
+                    elif piece == 'R':
+                        self.getRookMoves(r, c, moves)
+        return moves
+
 class Move:
     def __init__(self, startSq, endSq, board):
         self.startRow = startSq[0]

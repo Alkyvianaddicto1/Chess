@@ -90,6 +90,20 @@ class GameState:
                         self.getRookMoves(r, c, moves)
         return moves
 
+    def getPawnMoves(self, r, c, moves):
+        if self.whiteToMove: # White pawn moves
+            if self.board[r-1][c] == "--": # 1 square move
+                moves.append(Move((r, c), (r-1, c), self.board))
+                if r == 6 and self.board[r-2][c] == "--": # 2 square move
+                    moves.append(Move((r, c), (r-2, c), self.board))
+            # Captures
+            if c-1 >= 0: 
+                if self.board[r-1][c-1][0] == 'b':
+                    moves.append(Move((r, c), (r-1, c-1), self.board))
+            if c+1 <= 7:
+                if self.board[r-1][c+1][0] == 'b':
+                    moves.append(Move((r, c), (r-1, c+1), self.board))
+
 class Move:
     def __init__(self, startSq, endSq, board):
         self.startRow = startSq[0]

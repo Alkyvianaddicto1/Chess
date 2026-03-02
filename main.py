@@ -257,7 +257,7 @@ def findBestMove(gs, validMoves, depth):
 def minimax(gs, depth, depth_limit, alpha, beta, isMaximizing):
     global nextMove
     if depth == 0 or gs.checkMate or gs.staleMate:
-        return gs.score if isMaximizing else -gs.score
+        return evaluateBoard(gs)
 
     validMoves = gs.getValidMoves()
     if isMaximizing:
@@ -271,7 +271,8 @@ def minimax(gs, depth, depth_limit, alpha, beta, isMaximizing):
                 if depth == depth_limit:
                     nextMove = move
             alpha = max(alpha, eval)
-            if beta <= alpha: break
+            if beta <= alpha:
+                break # Alpha-Beta Pruning
         return maxEval
     else:
         minEval = 10000
@@ -284,7 +285,8 @@ def minimax(gs, depth, depth_limit, alpha, beta, isMaximizing):
                 if depth == depth_limit:
                     nextMove = move
             beta = min(beta, eval)
-            if beta <= alpha: break
+            if beta <= alpha:
+                break # Alpha-Beta Pruning
         return minEval
 
 # --- UI and Main Logic ---

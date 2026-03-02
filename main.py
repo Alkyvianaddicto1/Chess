@@ -13,7 +13,6 @@ def loadImages():
         try:
             IMAGES[piece] = pygame.transform.scale(pygame.image.load("images/" + piece + ".png"), (SQ_SIZE, SQ_SIZE))
         except:
-            # Fallback if you don't have images yet
             IMAGES[piece] = None
 
 class GameState:
@@ -40,15 +39,28 @@ class GameState:
         self.board[move.endRow][move.endCol] = move.pieceMoved
         self.moveLog.append(move)
         self.whiteToMove = not self.whiteToMove
-    
+        # Update king's location if moved
+        if move.pieceMoved == "wK":
+            self.whiteKingLocation = (move.endRow, move.endCol)
+        elif move.pieceMoved == "bK":
+            self.blackKingLocation = (move.endRow, move.endCol)
+
+    def undoMove(self):
+        if len(self.moveLog) != 0:
+            move = self.moveLog.pop()
+            self.board[move.startRow][move.startCol] = move.pieceMoved
+            self.board[move.endRow][move.endCol] = move.pieceCaptured
+            self.whiteToMove = not self.whiteToMove
+            # Update king's location if moved back
+            if move.pieceMoved == "wK":
+                self.whiteKingLocation = (move.startRow, move.startCol)
+            elif move.pieceMoved == "bK":
+                self.blackKingLocation = (move.startRow, move.startCol)
+
     def getValidMoves(self):
-        # 1. Generate all possible moves
         moves = self.getAllPossibleMoves()
-        # 2. For each move, make the move
         for i in range(len(moves) - 1, -1, -1):
             self.makeMove(moves[i])
-            # 3. Generate all opponent's moves
-            # 4. If any opponent move attacks your king, it's not a valid move
             self.whiteToMove = not self.whiteToMove
             if self.inCheck():
                 moves.remove(moves[i])
@@ -69,9 +81,9 @@ class GameState:
             return self.squareUnderAttack(self.blackKingLocation[0], self.blackKingLocation[1])
 
     def squareUnderAttack(self, r, c):
-        self.whiteToMove = not self.whiteToMove # switch to opponent's point of view
+        self.whiteToMove = not self.whiteToMove 
         oppMoves = self.getAllPossibleMoves()
-        self.whiteToMove = not self.whiteToMove # switch back
+        self.whiteToMove = not self.whiteToMove 
         for move in oppMoves:
             if move.endRow == r and move.endCol == c:
                 return True
@@ -88,38 +100,37 @@ class GameState:
                         self.getPawnMoves(r, c, moves)
                     elif piece == 'R':
                         self.getRookMoves(r, c, moves)
+                    elif piece == 'K':
+                        self.getKingMoves(r, c, moves)
         return moves
 
     def getPawnMoves(self, r, c, moves):
-        if self.whiteToMove: # White pawn moves
-            if self.board[r-1][c] == "--": # 1 square move
+        if self.whiteToMove: 
+            if self.board[r-1][c] == "--": 
                 moves.append(Move((r, c), (r-1, c), self.board))
-                if r == 6 and self.board[r-2][c] == "--": # 2 square move
+                if r == 6 and self.board[r-2][c] == "--": 
                     moves.append(Move((r, c), (r-2, c), self.board))
-            # Captures
             if c-1 >= 0: 
                 if self.board[r-1][c-1][0] == 'b':
                     moves.append(Move((r, c), (r-1, c-1), self.board))
             if c+1 <= 7:
                 if self.board[r-1][c+1][0] == 'b':
                     moves.append(Move((r, c), (r-1, c+1), self.board))
-        
-        else:
-            if self.blackToMove: # White pawn moves
-                if self.board[r+1][c] == "--": # 1 square move
+        else: # Black Pawn Moves
+            if r + 1 < 8:
+                if self.board[r+1][c] == "--":
                     moves.append(Move((r, c), (r+1, c), self.board))
-                    if r == 6 and self.board[r+2][c] == "--": # 2 square move
+                    if r == 1 and self.board[r+2][c] == "--":
                         moves.append(Move((r, c), (r+2, c), self.board))
-                # Captures
-                if c-1 >= 0: 
-                    if self.board[r+1][c-1][0] == 'b':
+                if c-1 >= 0:
+                    if self.board[r+1][c-1][0] == 'w':
                         moves.append(Move((r, c), (r+1, c-1), self.board))
                 if c+1 <= 7:
-                    if self.board[r+1][c+1][0] == 'b':
+                    if self.board[r+1][c+1][0] == 'w':
                         moves.append(Move((r, c), (r+1, c+1), self.board))
-    
+
     def getRookMoves(self, r, c, moves):
-        directions = ((-1, 0), (0, -1), (1, 0), (0, 1)) # up, left, down, right
+        directions = ((-1, 0), (0, -1), (1, 0), (0, 1))
         enemyColor = "b" if self.whiteToMove else "w"
         for d in directions:
             for i in range(1, 8):
@@ -127,24 +138,36 @@ class GameState:
                 endCol = c + d[1] * i
                 if 0 <= endRow < 8 and 0 <= endCol < 8:
                     endPiece = self.board[endRow][endCol]
-                    if endPiece == "--": # Empty space
+                    if endPiece == "--":
                         moves.append(Move((r, c), (endRow, endCol), self.board))
-                    elif endPiece[0] == enemyColor: # Enemy piece
+                    elif endPiece[0] == enemyColor:
                         moves.append(Move((r, c), (endRow, endCol), self.board))
                         break
-                    else: # Friendly piece
-                        break
-                else: # Off board
-                    break
+                    else: break
+                else: break
+
+    def getKingMoves(self, r, c, moves):
+        kingMoves = ((-1, -1), (-1, 0), (-1, 1), (0, -1), (0, 1), (1, -1), (1, 0), (1, 1))
+        allyColor = "w" if self.whiteToMove else "b"
+        for i in range(8):
+            endRow, endCol = r + kingMoves[i][0], c + kingMoves[i][1]
+            if 0 <= endRow < 8 and 0 <= endCol < 8:
+                endPiece = self.board[endRow][endCol]
+                if endPiece[0] != allyColor:
+                    moves.append(Move((r, c), (endRow, endCol), self.board))
 
 class Move:
     def __init__(self, startSq, endSq, board):
-        self.startRow = startSq[0]
-        self.startCol = startSq[1]
-        self.endRow = endSq[0]
-        self.endCol = endSq[1]
+        self.startRow, self.startCol = startSq
+        self.endRow, self.endCol = endSq
         self.pieceMoved = board[self.startRow][self.startCol]
         self.pieceCaptured = board[self.endRow][self.endCol]
+        self.moveID = self.startRow * 1000 + self.startCol * 100 + self.endRow * 10 + self.endCol
+
+    def __eq__(self, other):
+        if isinstance(other, Move):
+            return self.moveID == other.moveID
+        return False
 
 def main():
     pygame.init()
@@ -153,9 +176,7 @@ def main():
     clock = pygame.time.Clock()
     gs = GameState()
     loadImages()
-    running = True
-    sqSelected = () 
-    playerClicks = []
+    running, sqSelected, playerClicks = True, (), []
     validMoves = gs.getValidMoves()
     moveMade = False
 
@@ -165,11 +186,9 @@ def main():
                 running = False
             elif e.type == pygame.MOUSEBUTTONDOWN:
                 location = pygame.mouse.get_pos()
-                col = location[0] // SQ_SIZE
-                row = location[1] // SQ_SIZE
+                col, row = location[0] // SQ_SIZE, location[1] // SQ_SIZE
                 if sqSelected == (row, col):
-                    sqSelected = ()
-                    playerClicks = []
+                    sqSelected, playerClicks = (), []
                 else:
                     sqSelected = (row, col)
                     playerClicks.append(sqSelected)
@@ -180,14 +199,13 @@ def main():
                         if move == validMoves[i]:
                             gs.makeMove(validMoves[i])
                             moveMade = True
-                            sqSelected = ()
-                            playerClicks = []
+                            sqSelected, playerClicks = (), []
                     if not moveMade:
                         playerClicks = [sqSelected]
 
-                if moveMade:
-                    validMoves = gs.getValidMoves()
-                    moveMade = False
+        if moveMade:
+            validMoves = gs.getValidMoves()
+            moveMade = False
 
         drawGameState(screen, gs)
         clock.tick(MAX_FPS)
@@ -212,10 +230,9 @@ def drawPieces(screen, board):
                 if IMAGES[piece]:
                     screen.blit(IMAGES[piece], pygame.Rect(c*SQ_SIZE, r*SQ_SIZE, SQ_SIZE, SQ_SIZE))
                 else:
-                    # Text fallback if images are missing
                     font = pygame.font.SysFont("Arial", 16, True, False)
-                    textObject = font.render(piece, 0, pygame.Color('Red'))
-                    screen.blit(textObject, pygame.Rect(c*SQ_SIZE + 10, r*SQ_SIZE + 10, SQ_SIZE, SQ_SIZE))
+                    text = font.render(piece, 0, pygame.Color('Red'))
+                    screen.blit(text, pygame.Rect(c*SQ_SIZE + 10, r*SQ_SIZE + 10, SQ_SIZE, SQ_SIZE))
 
 if __name__ == "__main__":
     main()

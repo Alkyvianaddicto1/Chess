@@ -283,6 +283,27 @@ def drawSidePanel(screen, gs):
     text_obj = font.render(score_text, True, color)
     screen.blit(text_obj, (BOARD_WIDTH + 20, 50))
 
+    # --- Captured Pieces Gallery ---
+    small_sq = 25 # Smaller size for gallery icons
+    
+    # Pieces White has captured (Black's lost pieces)
+    screen.blit(font.render("Captured:", True, pygame.Color("gray")), (BOARD_WIDTH + 20, 130))
+    for i, piece in enumerate(gs.blackCaptured):
+        if IMAGES[piece]:
+            img = pygame.transform.scale(IMAGES[piece], (small_sq, small_sq))
+            # Wrap icons if they exceed panel width
+            x = BOARD_WIDTH + 20 + (i % 6) * (small_sq + 2)
+            y = 160 + (i // 6) * (small_sq + 2)
+            screen.blit(img, (x, y))
+
+    # Pieces Black has captured (White's lost pieces)
+    for i, piece in enumerate(gs.whiteCaptured):
+        if IMAGES[piece]:
+            img = pygame.transform.scale(IMAGES[piece], (small_sq, small_sq))
+            x = BOARD_WIDTH + 20 + (i % 6) * (small_sq + 2)
+            y = 260 + (i // 6) * (small_sq + 2)
+            screen.blit(img, (x, y))
+
     # Turn Indicator
     turn = "White's Turn" if gs.whiteToMove else "Black's Turn"
     turn_obj = font.render(turn, True, pygame.Color("white"))

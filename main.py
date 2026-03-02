@@ -237,6 +237,22 @@ def drawBoard(screen):
             color = colors[((r + c) % 2)]
             pygame.draw.rect(screen, color, pygame.Rect(c*SQ_SIZE, r*SQ_SIZE, SQ_SIZE, SQ_SIZE))
 
+def highlightSquares(screen, gs, validMoves, sqSelected):
+    if sqSelected != ():
+        r, c = sqSelected
+        if gs.board[r][c][0] == ('w' if gs.whiteToMove else 'b'): # piece is the right color
+            # Highlight selected square
+            s = pygame.Surface((SQ_SIZE, SQ_SIZE))
+            s.set_alpha(100) # transparency value (0-255)
+            s.fill(pygame.Color('blue'))
+            screen.blit(s, (c*SQ_SIZE, r*SQ_SIZE))
+            
+            # Highlight moves from that square
+            s.fill(pygame.Color('yellow'))
+            for move in validMoves:
+                if move.startRow == r and move.startCol == c:
+                    screen.blit(s, (move.endCol*SQ_SIZE, move.endRow*SQ_SIZE))
+
 def drawPieces(screen, board):
     for r in range(DIMENSION):
         for c in range(DIMENSION):

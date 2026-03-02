@@ -81,6 +81,7 @@ class GameState:
         ]
         self.whiteToMove = True
         self.moveLog = []
+        self.notationLog = []
         self.whiteKingLocation, self.blackKingLocation = (7, 4), (0, 4)
         self.checkMate = self.staleMate = self.is_forfeited = False
         self.score = 0 
@@ -97,6 +98,7 @@ class GameState:
         self.board[move.startRow][move.startCol] = "--"
         self.board[move.endRow][move.endCol] = move.pieceMoved
         self.moveLog.append(move)
+        self.notationLog.append(move.getChessNotation())
         self.whiteToMove = not self.whiteToMove
         if move.pieceMoved == "wK": self.whiteKingLocation = (move.endRow, move.endCol)
         elif move.pieceMoved == "bK": self.blackKingLocation = (move.endRow, move.endCol)

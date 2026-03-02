@@ -15,6 +15,8 @@ IMAGES = {}
 scroll_offset = 0
 current_theme = "Classic" # Default theme
 
+piece_score = {"K": 0, "Q": 9, "R": 5, "B": 3, "N": 3, "p": 1}
+
 def loadImages():
     try:
         # Adjusted path to match standard local directory structures
@@ -244,13 +246,13 @@ def findGreedyMove(gs, validMoves):
     return bestMove if bestMove else random.choice(validMoves)
 
 def findBestMove(gs, validMoves, depth):
-    """Hard/God Mode: Uses Minimax with Alpha-Beta Pruning."""
+    """Entry point for the AI to find the best move."""
     global nextMove
     nextMove = None
-    random.shuffle(validMoves)
-    # Pass 'depth' twice: once for countdown, once as the 'limit' reference
+    random.shuffle(validMoves) # Adds variety to same-score moves
+    # We pass 'depth' twice: once as current depth, once as the limit to identify the root move
     minimax(gs, depth, depth, -10000, 10000, gs.whiteToMove)
-    return nextMove if nextMove else random.choice(validMoves)
+    return nextMove
 
 def minimax(gs, depth, depth_limit, alpha, beta, isMaximizing):
     global nextMove

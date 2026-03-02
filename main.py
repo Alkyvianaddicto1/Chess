@@ -322,6 +322,16 @@ def main():
             moveMade = False
 
         drawGameState(screen, gs, validMoves, sqSelected)
+
+        if gs.checkMate:
+            gameOver = True
+            drawEndGameText(screen, "Black wins by Checkmate" if gs.whiteToMove else "White wins by Checkmate")
+        elif gs.staleMate:
+            gameOver = True
+            drawEndGameText(screen, "Stalemate")
+        elif gs.is_forfeited:
+            drawEndGameText(screen, "Game Over by Forfeit")
+
         clock.tick(MAX_FPS)
         pygame.display.flip()
 

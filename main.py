@@ -332,6 +332,10 @@ def main(mode="PVP"):
                     moveMade = False
                     gameOver = False
 
+            elif e.type == pygame.MOUSEWHEEL:
+                # e.y is 1 for up, -1 for down
+                scroll_offset = max(0, scroll_offset - e.y * 20)
+
         # COMPUTER MOVE LOGIC (AI)
         if not gameOver and not humanTurn:
             if validMoves:
@@ -351,6 +355,9 @@ def main(mode="PVP"):
         if moveMade:
             validMoves = gs.getValidMoves()
             moveMade = False
+            total_height = (len(gs.notationLog) // 2) * LINE_HEIGHT
+            if total_height > 150: # 150 is the height of the log_rect
+                scroll_offset = total_height - 130
 
         drawGameState(screen, gs, validMoves, sqSelected)
 
@@ -449,7 +456,7 @@ def drawSidePanel(screen, gs):
     mouse = pygame.mouse.get_pos()
     pygame.draw.rect(screen, (200,0,0) if btn_rect.collidepoint(mouse) else (150,0,0), btn_rect, border_radius=8)
     screen.blit(font.render("FORFEIT", True, (255,255,255)), (btn_rect.x + 35, btn_rect.y + 12))
-    
+
     return btn_rect
 
 def drawEndGameText(screen, text):

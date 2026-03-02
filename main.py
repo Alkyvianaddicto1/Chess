@@ -136,7 +136,7 @@ class GameState:
                         break
                 else: # Off board
                     break
-                
+
 class Move:
     def __init__(self, startSq, endSq, board):
         self.startRow = startSq[0]
@@ -155,7 +155,9 @@ def main():
     loadImages()
     running = True
     sqSelected = () 
-    playerClicks = [] 
+    playerClicks = []
+    validMoves = gs.getValidMoves()
+    moveMade = False
 
     while running:
         for e in pygame.event.get():
@@ -174,12 +176,18 @@ def main():
                 
                 if len(playerClicks) == 2:
                     move = Move(playerClicks[0], playerClicks[1], gs.board)
-                    # Basic turn validation (White can only move white pieces)
-                    if (gs.whiteToMove and move.pieceMoved[0] == 'w') or \
-                       (not gs.whiteToMove and move.pieceMoved[0] == 'b'):
-                        gs.makeMove(move)
-                    sqSelected = ()
-                    playerClicks = []
+                    for i in range(len(validMoves)):
+                        if move == validMoves[i]:
+                            gs.makeMove(validMoves[i])
+                            moveMade = True
+                            sqSelected = ()
+                            playerClicks = []
+                    if not moveMade:
+                        playerClicks = [sqSelected]
+
+                if moveMade:
+                    validMoves = gs.getValidMoves()
+                    moveMade = False
 
         drawGameState(screen, gs)
         clock.tick(MAX_FPS)

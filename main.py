@@ -45,6 +45,28 @@ class Move:
             return self.moveID == other.moveID
         return False
 
+    ranksToRows = {"1": 7, "2": 6, "3": 5, "4": 4, "5": 3, "6": 2, "7": 1, "8": 0}
+    rowsToRanks = {v: k for k, v in ranksToRows.items()}
+    filesToCols = {"a": 0, "b": 1, "c": 2, "d": 3, "e": 4, "f": 5, "g": 6, "h": 7}
+    colsToFiles = {v: k for k, v in filesToCols.items()}
+
+    def getChessNotation(self):
+        """Returns standard algebraic notation like 'Nf3' or 'e4'."""
+        if self.pieceMoved[1] == 'p':
+            # Pawn moves: just destination (e.g., e4) or capture (e.g., exd5)
+            if self.pieceCaptured != "--":
+                return self.colsToFiles[self.startCol] + "x" + self.getRankFile(self.endRow, self.endCol)
+            return self.getRankFile(self.endRow, self.endCol)
+        
+        # Piece moves: Piece Initial + destination (e.g., Nf3)
+        move_str = self.pieceMoved[1]
+        if self.pieceCaptured != "--":
+            move_str += "x"
+        return move_str + self.getRankFile(self.endRow, self.endCol)
+
+    def getRankFile(self, r, c):
+        return self.colsToFiles[c] + self.rowsToRanks[r]
+
 class GameState:
     def __init__(self):
         self.board = [

@@ -194,6 +194,11 @@ class GameState:
                 if self.board[endRow][endCol][0] != allyColor:
                     moves.append(Move((r, c), (endRow, endCol), self.board))
 
+    def getQueenMoves(self, r, c, moves):
+        # A Queen is just a Rook + a Bishop
+        self.getRookMoves(r, c, moves)
+        self.getBishopMoves(r, c, moves)
+
     def getPawnMoves(self, r, c, moves):
         if self.whiteToMove: 
             if r-1 >= 0 and self.board[r-1][c] == "--": 

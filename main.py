@@ -10,6 +10,7 @@ DIMENSION = 8
 SQ_SIZE = HEIGHT // DIMENSION
 MAX_FPS = 15
 IMAGES = {}
+scroll_offset = 0
 
 def loadImages():
     try:
@@ -401,6 +402,7 @@ def drawPieces(screen, board):
                     screen.blit(IMAGES[piece], pygame.Rect(c*SQ_SIZE, r*SQ_SIZE, SQ_SIZE, SQ_SIZE))
 
 def drawSidePanel(screen, gs):
+    global scroll_offset
     font = pygame.font.SysFont("Arial", 22, True)
     panel_surface = pygame.Surface((PANEL_WIDTH, HEIGHT))
     panel_surface.set_alpha(160) 

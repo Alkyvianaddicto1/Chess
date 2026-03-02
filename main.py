@@ -1,5 +1,6 @@
 import pygame
 import random
+import sys
 
 # --- Configuration ---
 BOARD_WIDTH, HEIGHT = 512, 512
@@ -274,11 +275,15 @@ def main(mode="PVP"):
             moveMade = False
 
         drawGameState(screen, gs, validMoves, sqSelected)
+
         if gs.checkMate:
+            gameOver = True
             drawEndGameText(screen, "Black wins by Checkmate" if gs.whiteToMove else "White wins by Checkmate")
         elif gs.staleMate:
+            gameOver = True
             drawEndGameText(screen, "Stalemate")
         elif gs.is_forfeited:
+            gameOver = True
             drawEndGameText(screen, "Game Over by Forfeit")
 
         clock.tick(MAX_FPS)

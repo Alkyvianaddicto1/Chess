@@ -325,11 +325,19 @@ def main(mode="PVP"):
         # COMPUTER MOVE LOGIC (AI)
         if not gameOver and not humanTurn:
             if validMoves:
-                pygame.time.delay(500) # Slight delay so moves aren't instant
-                ai_move = random.choice(validMoves)
+                pygame.time.delay(500)
+                if mode == "EASY":
+                    ai_move = random.choice(validMoves)
+                elif mode == "MEDIUM":
+                    ai_move = findGreedyMove(gs, validMoves)
+                elif mode == "HARD":
+                    ai_move = findBestMove(gs, validMoves, 2)
+                elif mode == "GOD MODE":
+                    ai_move = findBestMove(gs, validMoves, 3) # Depth 3 is very strong for Pygame
+                
                 gs.makeMove(ai_move)
                 moveMade = True
-
+                
         if moveMade:
             validMoves = gs.getValidMoves()
             moveMade = False

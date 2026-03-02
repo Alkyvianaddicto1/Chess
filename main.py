@@ -411,10 +411,8 @@ def drawGameState(screen, gs, validMoves, sqSelected):
     drawPieces(screen, gs.board)
 
 def drawBoard(screen):
-    global current_theme
-    # Get the tuple of (light_color, dark_color) for the active theme
+    # Access the global theme variable
     colors = BOARD_THEMES[current_theme]
-
     for r in range(DIMENSION):
         for c in range(DIMENSION):
             color = colors[(r + c) % 2]

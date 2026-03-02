@@ -225,8 +225,9 @@ def main():
         clock.tick(MAX_FPS)
         pygame.display.flip()
 
-def drawGameState(screen, gs):
-    drawBoard(screen)
+def drawGameState(screen, gs, validMoves, sqSelected):
+    drawBoard(screen) # Draw squares
+    highlightSquares(screen, gs, validMoves, sqSelected) # Added this
     drawPieces(screen, gs.board)
 
 def drawBoard(screen):

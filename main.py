@@ -417,6 +417,22 @@ def drawSidePanel(screen, gs):
     
     return btn_rect
 
+def drawEndGameText(screen, text):
+    font = pygame.font.SysFont("Arial", 32, True, False)
+    text_surface = font.render(text, True, pygame.Color('White'))
+    
+    # Create a background shadow box for the text
+    bg_rect = pygame.Rect(0, 0, text_surface.get_width() + 20, text_surface.get_height() + 20)
+    bg_rect.center = (BOARD_WIDTH // 2, HEIGHT // 2)
+    
+    # Draw shadow then text
+    pygame.draw.rect(screen, pygame.Color("Black"), bg_rect, border_radius=10)
+    text_location = pygame.Rect(0, 0, BOARD_WIDTH, HEIGHT).move(
+        BOARD_WIDTH // 2 - text_surface.get_width() // 2,
+        HEIGHT // 2 - text_surface.get_height() // 2
+    )
+    screen.blit(text_surface, text_location)
+
 def drawPieces(screen, board):
     for r in range(DIMENSION):
         for c in range(DIMENSION):

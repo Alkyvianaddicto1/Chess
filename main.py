@@ -446,7 +446,7 @@ def drawSidePanel(screen, gs):
     font = pygame.font.SysFont("Arial", 18, True)
     panel_surface = pygame.Surface((PANEL_WIDTH, HEIGHT))
     panel_surface.set_alpha(160) 
-    panel_surface.fill((45, 45, 45)) 
+    panel_surface.fill(PANEL_BG_COLOR)
     screen.blit(panel_surface, (BOARD_WIDTH, 0))
     pygame.draw.line(screen, (200, 200, 200), (BOARD_WIDTH, 0), (BOARD_WIDTH, HEIGHT), 2)
     

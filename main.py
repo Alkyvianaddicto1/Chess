@@ -289,6 +289,22 @@ def minimax(gs, depth, depth_limit, alpha, beta, isMaximizing):
                 break # Alpha-Beta Pruning
         return minEval
 
+def evaluateBoard(gs):
+    """Calculates the score based on material on the board."""
+    if gs.checkMate:
+        return -9999 if gs.whiteToMove else 9999
+    if gs.staleMate:
+        return 0
+        
+    score = 0
+    for row in gs.board:
+        for square in row:
+            if square[0] == 'w':
+                score += piece_score[square[1]]
+            elif square[0] == 'b':
+                score -= piece_score[square[1]]
+    return score
+
 # --- UI and Main Logic ---
 
 def main(mode="PVP"):

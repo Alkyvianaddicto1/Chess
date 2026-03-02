@@ -224,8 +224,36 @@ class GameState:
         minimax(gs, depth, -10000, 10000, gs.whiteToMove)
         return nextMove if nextMove else random.choice(validMoves)
 
-    
-    
+    def minimax(gs, depth, alpha, beta, isMaximizing):
+        global nextMove
+        if depth == 0 or gs.checkMate or gs.staleMate:
+            return gs.score if isMaximizing else -gs.score
+
+        validMoves = gs.getValidMoves()
+        if isMaximizing:
+            maxEval = -10000
+            for move in validMoves:
+                gs.makeMove(move)
+                eval = minimax(gs, depth - 1, alpha, beta, False)
+                gs.undoMove()
+                if eval > maxEval:
+                    maxEval = eval
+                    if depth == 2 or depth == 3: # Adjust based on God Mode depth
+                        nextMove = move
+                alpha = max(alpha, eval)
+                if beta <= alpha: break
+            return maxEval
+        else:
+            minEval = 10000
+            for move in validMoves:
+                gs.makeMove(move)
+                eval = minimax(gs, depth - 1, alpha, beta, True)
+                gs.undoMove()
+                minEval = min(minEval, eval)
+                beta = min(beta, eval)
+                if beta <= alpha: break
+            return minEval
+
 # --- UI and Main Logic ---
 
 def main(mode="PVP"):

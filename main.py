@@ -194,7 +194,68 @@ class GameState:
             if 0 <= er < 8 and 0 <= ec < 8 and self.board[er][ec][0] != ally:
                 moves.append(Move((r, c), (er, ec), self.board))
 
+
+# --- AI Intelligence Functions ---
+
+def findGreedyMove(gs, validMoves):
+    """Medium Difficulty: Picks the move with the highest value capture."""
+    turnMultiplier = 1 if gs.whiteToMove else -1
+    maxScore = -float('inf')
+    bestMove = None
     
+    for move in validMoves:
+        gs.makeMove(move)
+        if gs.checkMate:
+            score = 999
+        elif gs.staleMate:
+            score = 0
+        else:
+            score = turnMultiplier * gs.score
+        
+        if score > maxScore:
+            maxScore = score
+            bestMove = move
+        gs.undoMove()
+    return bestMove if bestMove else random.choice(validMoves)
+
+def findBestMove(gs, validMoves, depth):
+    """Hard/God Mode: Uses Minimax with Alpha-Beta Pruning."""
+    global nextMove
+    nextMove = None
+    random.shuffle(validMoves)
+    minimax(gs, depth, -10000, 10000, gs.whiteToMove)
+    return nextMove if nextMove else random.choice(validMoves)
+
+def minimax(gs, depth, alpha, beta, isMaximizing):
+    global nextMove
+    if depth == 0 or gs.checkMate or gs.staleMate:
+        return gs.score if isMaximizing else -gs.score
+
+    validMoves = gs.getValidMoves()
+    if isMaximizing:
+        maxEval = -10000
+        for move in validMoves:
+            gs.makeMove(move)
+            eval = minimax(gs, depth - 1, alpha, beta, False)
+            gs.undoMove()
+            if eval > maxEval:
+                maxEval = eval
+                if depth == depth_limit: # This should match your initial call depth
+                    nextMove = move
+            alpha = max(alpha, eval)
+            if beta <= alpha: break
+        return maxEval
+    else:
+        minEval = 10000
+        for move in validMoves:
+            gs.makeMove(move)
+            eval = minimax(gs, depth - 1, alpha, beta, True)
+            gs.undoMove()
+            minEval = min(minEval, eval)
+            beta = min(beta, eval)
+            if beta <= alpha: break
+        return minEval
+
 # --- UI and Main Logic ---
 
 def main(mode="PVP"):

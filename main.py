@@ -270,6 +270,7 @@ def main():
     running, sqSelected, playerClicks = True, (), []
     validMoves = gs.getValidMoves()
     moveMade = False
+    gameOver = False
 
     while running:
         forfeit_btn = drawSidePanel(screen, gs)
@@ -278,12 +279,12 @@ def main():
             if e.type == pygame.QUIT:
                 running = False
             elif e.type == pygame.MOUSEBUTTONDOWN:
-                location = pygame.mouse.get_pos()
-                
-                # Check for Forfeit click
-                if forfeit_btn.collidepoint(location):
-                    print("Game Over! Forfeited.")
-                    return # Exit to menu
+                if not gameOver: # Only allow moves if game is not over
+                    location = pygame.mouse.get_pos()
+                    
+                    if forfeit_btn.collidepoint(location):
+                        gameOver = True
+                        gs.is_forfeited = Truemenu
 
                 # Ensure click is on the board
                 if location[0] <= BOARD_WIDTH:
@@ -308,11 +309,13 @@ def main():
                 if e.key == pygame.K_z:
                     gs.undoMove()
                     moveMade = True
+                    gameOver = False # Reset gameOver state on undo
                 if e.key == pygame.K_r:
                     gs = GameState()
                     validMoves = gs.getValidMoves()
                     sqSelected, playerClicks = (), []
                     moveMade = False
+                    gameOver = False # Reset gameOver state on reset
 
         if moveMade:
             validMoves = gs.getValidMoves()

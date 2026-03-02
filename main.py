@@ -409,10 +409,14 @@ def drawGameState(screen, gs, validMoves, sqSelected):
     drawPieces(screen, gs.board)
 
 def drawBoard(screen):
-    colors = [pygame.Color("white"), pygame.Color("gray")]
+    global current_theme
+    # Get the tuple of (light_color, dark_color) for the active theme
+    colors = BOARD_THEMES[current_theme]
+
     for r in range(DIMENSION):
         for c in range(DIMENSION):
-            pygame.draw.rect(screen, colors[((r + c) % 2)], pygame.Rect(c*SQ_SIZE, r*SQ_SIZE, SQ_SIZE, SQ_SIZE))
+            color = colors[(r + c) % 2]
+            pygame.draw.rect(screen, color, pygame.Rect(c*SQ_SIZE, r*SQ_SIZE, SQ_SIZE, SQ_SIZE))
 
 def highlightSquares(screen, gs, validMoves, sqSelected):
     if sqSelected != ():

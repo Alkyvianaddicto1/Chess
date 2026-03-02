@@ -33,6 +33,9 @@ class GameState:
         self.blackKingLocation = (0, 4)
         self.checkMate = False
         self.staleMate = False
+        self.score = 0  # Positive for White, Negative for Black
+        self.piece_values = {"p": 1, "N": 3, "B": 3, "R": 5, "Q": 9, "K": 0}
+        self.is_forfeited = False
 
     def makeMove(self, move):
         self.board[move.startRow][move.startCol] = "--"

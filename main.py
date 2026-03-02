@@ -333,7 +333,7 @@ def animateMove(move, screen, board, clock):
         screen.blit(IMAGES[move.pieceMoved], pygame.Rect(col * SQ_SIZE, row * SQ_SIZE, SQ_SIZE, SQ_SIZE))
         pygame.display.flip()
         clock.tick(60) # High FPS for smooth sliding
-        
+
 # --- UI and Main Logic ---
 
 def main(mode="PVP"):
@@ -433,8 +433,13 @@ def main(mode="PVP"):
                 moveMade = True
 
         if moveMade:
+            if animate:
+                # Call the animation before the board officially updates
+                animateMove(gs.moveLog[-1], screen, gs.board, clock)
             validMoves = gs.getValidMoves()
             moveMade = False
+            animate = False
+            
             total_height = (len(gs.notationLog) // 2) * LINE_HEIGHT
             if total_height > 150: # 150 is the height of the log_rect
                 scroll_offset = total_height - 130

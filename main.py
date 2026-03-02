@@ -1,14 +1,17 @@
 import pygame
 
 # --- Configuration ---
-WIDTH, HEIGHT = 512, 512
+BOARD_WIDTH, HEIGHT = 512, 512
+PANEL_WIDTH = 200  # Space for Score and Forfeit button
+WIDTH = BOARD_WIDTH + PANEL_WIDTH
 DIMENSION = 8 
 SQ_SIZE = HEIGHT // DIMENSION
 MAX_FPS = 15
 IMAGES = {}
 
 def loadImages():
-    pieces = ['wp', 'wR', 'wN', 'wB', 'wK', 'wQ', '♟', 'bR', 'bN', 'bB', 'bK', 'bQ']
+    # Fixed '♟' to 'bp' to match the board array and image naming convention
+    pieces = ['wp', 'wR', 'wN', 'wB', 'wK', 'wQ', 'bp', 'bR', 'bN', 'bB', 'bK', 'bQ']
     for piece in pieces:
         try:
             IMAGES[piece] = pygame.transform.scale(pygame.image.load("images/" + piece + ".png"), (SQ_SIZE, SQ_SIZE))
@@ -19,7 +22,7 @@ class GameState:
     def __init__(self):
         self.board = [
             ["bR", "bN", "bB", "bQ", "bK", "bB", "bN", "bR"],
-            ["♟", "♟", "♟", "♟", "♟", "♟", "♟", "♟"],
+            ["bp", "bp", "bp", "bp", "bp", "bp", "bp", "bp"],
             ["--", "--", "--", "--", "--", "--", "--", "--"],
             ["--", "--", "--", "--", "--", "--", "--", "--"],
             ["--", "--", "--", "--", "--", "--", "--", "--"],
@@ -33,16 +36,21 @@ class GameState:
         self.blackKingLocation = (0, 4)
         self.checkMate = False
         self.staleMate = False
-        self.score = 0  # Positive for White, Negative for Black
+        self.score = 0 
         self.piece_values = {"p": 1, "N": 3, "B": 3, "R": 5, "Q": 9, "K": 0}
         self.is_forfeited = False
 
     def makeMove(self, move):
+        # Update Score on capture
+        if move.pieceCaptured != "--":
+            val = self.piece_values[move.pieceCaptured[1]]
+            self.score += val if self.whiteToMove else -val
+
         self.board[move.startRow][move.startCol] = "--"
         self.board[move.endRow][move.endCol] = move.pieceMoved
         self.moveLog.append(move)
         self.whiteToMove = not self.whiteToMove
-        # Update king's location if moved
+        
         if move.pieceMoved == "wK":
             self.whiteKingLocation = (move.endRow, move.endCol)
         elif move.pieceMoved == "bK":
@@ -51,10 +59,15 @@ class GameState:
     def undoMove(self):
         if len(self.moveLog) != 0:
             move = self.moveLog.pop()
+            # Reverse score on undo
+            if move.pieceCaptured != "--":
+                val = self.piece_values[move.pieceCaptured[1]]
+                self.score -= val if self.whiteToMove else -val
+
             self.board[move.startRow][move.startCol] = move.pieceMoved
             self.board[move.endRow][move.endCol] = move.pieceCaptured
             self.whiteToMove = not self.whiteToMove
-            # Update king's location if moved back
+            
             if move.pieceMoved == "wK":
                 self.whiteKingLocation = (move.startRow, move.startCol)
             elif move.pieceMoved == "bK":
@@ -109,17 +122,17 @@ class GameState:
 
     def getPawnMoves(self, r, c, moves):
         if self.whiteToMove: 
-            if self.board[r-1][c] == "--": 
+            if r-1 >= 0 and self.board[r-1][c] == "--": 
                 moves.append(Move((r, c), (r-1, c), self.board))
                 if r == 6 and self.board[r-2][c] == "--": 
                     moves.append(Move((r, c), (r-2, c), self.board))
-            if c-1 >= 0: 
+            if r-1 >= 0 and c-1 >= 0: 
                 if self.board[r-1][c-1][0] == 'b':
                     moves.append(Move((r, c), (r-1, c-1), self.board))
-            if c+1 <= 7:
+            if r-1 >= 0 and c+1 <= 7:
                 if self.board[r-1][c+1][0] == 'b':
                     moves.append(Move((r, c), (r-1, c+1), self.board))
-        else: # Black Pawn Moves
+        else: 
             if r + 1 < 8:
                 if self.board[r+1][c] == "--":
                     moves.append(Move((r, c), (r+1, c), self.board))
@@ -137,8 +150,7 @@ class GameState:
         enemyColor = "b" if self.whiteToMove else "w"
         for d in directions:
             for i in range(1, 8):
-                endRow = r + d[0] * i
-                endCol = c + d[1] * i
+                endRow, endCol = r + d[0] * i, c + d[1] * i
                 if 0 <= endRow < 8 and 0 <= endCol < 8:
                     endPiece = self.board[endRow][endCol]
                     if endPiece == "--":
@@ -184,53 +196,59 @@ def main():
     moveMade = False
 
     while running:
+        forfeit_btn = drawSidePanel(screen, gs)
+
         for e in pygame.event.get():
             if e.type == pygame.QUIT:
                 running = False
-            # Mouse handler
             elif e.type == pygame.MOUSEBUTTONDOWN:
                 location = pygame.mouse.get_pos()
-                col, row = location[0] // SQ_SIZE, location[1] // SQ_SIZE
-                if sqSelected == (row, col):
-                    sqSelected, playerClicks = (), []
-                else:
-                    sqSelected = (row, col)
-                    playerClicks.append(sqSelected)
                 
-                if len(playerClicks) == 2:
-                    move = Move(playerClicks[0], playerClicks[1], gs.board)
-                    for i in range(len(validMoves)):
-                        if move == validMoves[i]:
-                            gs.makeMove(validMoves[i])
-                            moveMade = True
-                            sqSelected, playerClicks = (), []
-                    if not moveMade:
-                        playerClicks = [sqSelected]
+                # Check for Forfeit click
+                if forfeit_btn.collidepoint(location):
+                    print("Game Over! Forfeited.")
+                    return # Exit to menu
 
-            # Shortcut keys handler
+                # Ensure click is on the board
+                if location[0] <= BOARD_WIDTH:
+                    col, row = location[0] // SQ_SIZE, location[1] // SQ_SIZE
+                    if sqSelected == (row, col):
+                        sqSelected, playerClicks = (), []
+                    else:
+                        sqSelected = (row, col)
+                        playerClicks.append(sqSelected)
+                    
+                    if len(playerClicks) == 2:
+                        move = Move(playerClicks[0], playerClicks[1], gs.board)
+                        for i in range(len(validMoves)):
+                            if move == validMoves[i]:
+                                gs.makeMove(validMoves[i])
+                                moveMade = True
+                                sqSelected, playerClicks = (), []
+                        if not moveMade:
+                            playerClicks = [sqSelected]
+
             elif e.type == pygame.KEYDOWN:
-                if e.key == pygame.K_z: # Undo move when 'z' is pressed
+                if e.key == pygame.K_z:
                     gs.undoMove()
                     moveMade = True
-                if e.key == pygame.K_r: # Reset game when 'r' is pressed
+                if e.key == pygame.K_r:
                     gs = GameState()
                     validMoves = gs.getValidMoves()
-                    sqSelected = ()
-                    playerClicks = []
+                    sqSelected, playerClicks = (), []
                     moveMade = False
 
         if moveMade:
             validMoves = gs.getValidMoves()
             moveMade = False
 
-        # Draw updated state
-        drawGameState(screen, gs, validMoves, sqSelected) # Added validMoves and sqSelected
+        drawGameState(screen, gs, validMoves, sqSelected)
         clock.tick(MAX_FPS)
         pygame.display.flip()
 
 def drawGameState(screen, gs, validMoves, sqSelected):
-    drawBoard(screen) # Draw squares
-    highlightSquares(screen, gs, validMoves, sqSelected) # Added this
+    drawBoard(screen)
+    highlightSquares(screen, gs, validMoves, sqSelected)
     drawPieces(screen, gs.board)
 
 def drawBoard(screen):
@@ -243,18 +261,43 @@ def drawBoard(screen):
 def highlightSquares(screen, gs, validMoves, sqSelected):
     if sqSelected != ():
         r, c = sqSelected
-        if gs.board[r][c][0] == ('w' if gs.whiteToMove else 'b'): # piece is the right color
-            # Highlight selected square
+        if gs.board[r][c][0] == ('w' if gs.whiteToMove else 'b'):
             s = pygame.Surface((SQ_SIZE, SQ_SIZE))
-            s.set_alpha(100) # transparency value (0-255)
+            s.set_alpha(100)
             s.fill(pygame.Color('blue'))
             screen.blit(s, (c*SQ_SIZE, r*SQ_SIZE))
-            
-            # Highlight moves from that square
             s.fill(pygame.Color('yellow'))
             for move in validMoves:
                 if move.startRow == r and move.startCol == c:
                     screen.blit(s, (move.endCol*SQ_SIZE, move.endRow*SQ_SIZE))
+
+def drawSidePanel(screen, gs):
+    font = pygame.font.SysFont("Arial", 22, True)
+    # Background
+    pygame.draw.rect(screen, pygame.Color("black"), pygame.Rect(BOARD_WIDTH, 0, PANEL_WIDTH, HEIGHT))
+    
+    # Score
+    score_text = f"Score: {gs.score}"
+    # Green if white is winning, red if black is winning
+    color = pygame.Color("green") if gs.score >= 0 else pygame.Color("red")
+    text_obj = font.render(score_text, True, color)
+    screen.blit(text_obj, (BOARD_WIDTH + 20, 50))
+
+    # Turn Indicator
+    turn = "White's Turn" if gs.whiteToMove else "Black's Turn"
+    turn_obj = font.render(turn, True, pygame.Color("white"))
+    screen.blit(turn_obj, (BOARD_WIDTH + 20, 100))
+
+    # Forfeit Button
+    btn_rect = pygame.Rect(BOARD_WIDTH + 25, 400, 150, 45)
+    mouse = pygame.mouse.get_pos()
+    btn_color = pygame.Color("red") if btn_rect.collidepoint(mouse) else pygame.Color("darkred")
+    pygame.draw.rect(screen, btn_color, btn_rect, border_radius=5)
+    
+    btn_text = font.render("FORFEIT", True, pygame.Color("white"))
+    screen.blit(btn_text, (btn_rect.x + 30, btn_rect.y + 10))
+    
+    return btn_rect
 
 def drawPieces(screen, board):
     for r in range(DIMENSION):

@@ -159,9 +159,31 @@ class GameState:
                         self.getPawnMoves(r, c, moves)
                     elif piece == 'R':
                         self.getRookMoves(r, c, moves)
+                    elif piece == 'N':
+                        self.getKnightMoves(r, c, moves)
+                    elif piece == 'B':
+                        self.getBishopMoves(r, c, moves)
+                    elif piece == 'Q':
+                        self.getQueenMoves(r, c, moves)
                     elif piece == 'K':
                         self.getKingMoves(r, c, moves)
         return moves
+    
+    def getBishopMoves(self, r, c, moves):
+        directions = ((-1, -1), (-1, 1), (1, -1), (1, 1)) # Diagonals
+        enemyColor = "b" if self.whiteToMove else "w"
+        for d in directions:
+            for i in range(1, 8):
+                endRow, endCol = r + d[0] * i, c + d[1] * i
+                if 0 <= endRow < 8 and 0 <= endCol < 8:
+                    endPiece = self.board[endRow][endCol]
+                    if endPiece == "--":
+                        moves.append(Move((r, c), (endRow, endCol), self.board))
+                    elif endPiece[0] == enemyColor:
+                        moves.append(Move((r, c), (endRow, endCol), self.board))
+                        break
+                    else: break # Ally piece
+                else: break # Off board
 
     def getPawnMoves(self, r, c, moves):
         if self.whiteToMove: 

@@ -350,6 +350,7 @@ def main(mode="PVP"):
             elif e.type == pygame.KEYDOWN:
 
                 if e.key == pygame.K_c: # Press 'C' to change colors
+                    global current_theme  # Add this line to access the global variable
                     theme_names = list(BOARD_THEMES.keys())
                     current_index = theme_names.index(current_theme)
                     # Cycle to the next theme in the list
@@ -359,7 +360,7 @@ def main(mode="PVP"):
                     gs.undoMove()
                     moveMade = True
                     gameOver = False
-                    
+
                 if e.key == pygame.K_r:
                     gs = GameState()
                     validMoves = gs.getValidMoves()

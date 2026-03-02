@@ -348,10 +348,18 @@ def main(mode="PVP"):
                         if not moveMade: playerClicks = [sqSelected]
 
             elif e.type == pygame.KEYDOWN:
+
+                if e.key == pygame.K_c: # Press 'C' to change colors
+                    theme_names = list(BOARD_THEMES.keys())
+                    current_index = theme_names.index(current_theme)
+                    # Cycle to the next theme in the list
+                    current_theme = theme_names[(current_index + 1) % len(theme_names)]
+
                 if e.key == pygame.K_z:
                     gs.undoMove()
                     moveMade = True
                     gameOver = False
+                    
                 if e.key == pygame.K_r:
                     gs = GameState()
                     validMoves = gs.getValidMoves()

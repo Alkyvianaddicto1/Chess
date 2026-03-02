@@ -184,6 +184,15 @@ class GameState:
                         break
                     else: break # Ally piece
                 else: break # Off board
+    
+    def getKnightMoves(self, r, c, moves):
+        knightMoves = ((-2, -1), (-2, 1), (-1, -2), (-1, 2), (1, -2), (1, 2), (2, -1), (2, 1))
+        allyColor = "w" if self.whiteToMove else "b"
+        for m in knightMoves:
+            endRow, endCol = r + m[0], c + m[1]
+            if 0 <= endRow < 8 and 0 <= endCol < 8:
+                if self.board[endRow][endCol][0] != allyColor:
+                    moves.append(Move((r, c), (endRow, endCol), self.board))
 
     def getPawnMoves(self, r, c, moves):
         if self.whiteToMove: 

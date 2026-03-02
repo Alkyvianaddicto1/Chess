@@ -2,6 +2,8 @@ import pygame
 import random
 import sys
 
+from settings import BOARD_THEMES, LINE_HEIGHT, PANEL_BG_COLOR
+
 # --- Configuration ---
 BOARD_WIDTH, HEIGHT = 512, 512
 PANEL_WIDTH = 200 

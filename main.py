@@ -11,6 +11,7 @@ SQ_SIZE = HEIGHT // DIMENSION
 MAX_FPS = 15
 IMAGES = {}
 scroll_offset = 0
+LINE_HEIGHT = 22
 
 def loadImages():
     try:
@@ -222,6 +223,24 @@ class GameState:
 
 # --- AI Intelligence Functions ---
 
+def findGreedyMove(gs, validMoves):
+    """Medium Difficulty: Picks the move with the highest value capture."""
+    turnMultiplier = 1 if gs.whiteToMove else -1
+    maxScore = -10000
+    bestMove = None
+    
+    for move in validMoves:
+        gs.makeMove(move)
+        # Calculate score from the perspective of the current player
+        score = turnMultiplier * gs.score
+        
+        if score > maxScore:
+            maxScore = score
+            bestMove = move
+        gs.undoMove()
+        
+    return bestMove if bestMove else random.choice(validMoves)
+
 def findBestMove(gs, validMoves, depth):
     """Hard/God Mode: Uses Minimax with Alpha-Beta Pruning."""
     global nextMove
@@ -283,6 +302,7 @@ def main(mode="PVP"):
     playerTwo = True if mode == "PVP" else False 
 
     while running:
+        screen.fill((0, 0 , 0))
         humanTurn = (gs.whiteToMove and playerOne) or (not gs.whiteToMove and playerTwo)
         forfeit_btn = drawSidePanel(screen, gs)
 

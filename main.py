@@ -352,6 +352,58 @@ def getQueenMoves(self, r, c, moves):
         self.getRookMoves(r, c, moves)
         self.getBishopMoves(r, c, moves)
 
+def drawSidePanel(screen, gs):
+    font = pygame.font.SysFont("Arial", 22, True)
+    
+    # 1. Create a semi-transparent surface for the "blurred/glass" effect
+    # Medium-dark gray (50, 50, 50) at 160 alpha allows both piece colors to be visible
+    panel_surface = pygame.Surface((PANEL_WIDTH, HEIGHT))
+    panel_surface.set_alpha(160) 
+    panel_surface.fill((50, 50, 50)) 
+    screen.blit(panel_surface, (BOARD_WIDTH, 0))
+
+    # 2. Draw a separator line
+    pygame.draw.line(screen, (200, 200, 200), (BOARD_WIDTH, 0), (BOARD_WIDTH, HEIGHT), 2)
+
+    # --- Score & Turn ---
+    score_text = f"Score: {gs.score}"
+    color = pygame.Color("green") if gs.score >= 0 else pygame.Color("red")
+    screen.blit(font.render(score_text, True, color), (BOARD_WIDTH + 20, 30))
+    
+    turn = "White's Turn" if gs.whiteToMove else "Black's Turn"
+    screen.blit(font.render(turn, True, pygame.Color("white")), (BOARD_WIDTH + 20, 70))
+
+    # --- Captured Pieces Gallery ---
+    small_sq = 25 
+    screen.blit(font.render("Captured:", True, pygame.Color("lightgray")), (BOARD_WIDTH + 20, 130))
+    
+    # Draw Black pieces captured (White captures them)
+    for i, piece in enumerate(gs.blackCaptured):
+        if IMAGES[piece]:
+            img = pygame.transform.smoothscale(IMAGES[piece], (small_sq, small_sq))
+            x = BOARD_WIDTH + 20 + (i % 6) * (small_sq + 4)
+            y = 160 + (i // 6) * (small_sq + 4)
+            screen.blit(img, (x, y))
+
+    # Draw White pieces captured (Black captures them)
+    for i, piece in enumerate(gs.whiteCaptured):
+        if IMAGES[piece]:
+            img = pygame.transform.smoothscale(IMAGES[piece], (small_sq, small_sq))
+            x = BOARD_WIDTH + 20 + (i % 6) * (small_sq + 4)
+            y = 280 + (i // 6) * (small_sq + 4)
+            screen.blit(img, (x, y))
+
+    # --- Forfeit Button ---
+    btn_rect = pygame.Rect(BOARD_WIDTH + 25, 430, 150, 45)
+    mouse = pygame.mouse.get_pos()
+    btn_color = (200, 0, 0) if btn_rect.collidepoint(mouse) else (150, 0, 0)
+    pygame.draw.rect(screen, btn_color, btn_rect, border_radius=8)
+    
+    btn_text = font.render("FORFEIT", True, pygame.Color("white"))
+    screen.blit(btn_text, (btn_rect.x + 35, btn_rect.y + 10))
+    
+    return btn_rect
+
 def drawPieces(screen, board):
     for r in range(DIMENSION):
         for c in range(DIMENSION):
